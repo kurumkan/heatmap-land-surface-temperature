@@ -1,5 +1,5 @@
-#D3 js Scatterplot
+#D3 js Heatmap
 
-Doping in Professional Bicycle Racing Scatterplot
+Monthly Global Land-Surface Temperature
 
-See the <a href="http://codepen.io/pbweb/full/QKmGmP/" target="_blank">demo</a>.
+See the <a href="http://codepen.io/pbweb/full/ozyLOd/" target="_blank">demo</a>.

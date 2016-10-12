@@ -26,27 +26,33 @@
                 var dataset = json;                  
                 update(dataset);                 
             });
-            function update(dataset){
+            //draw the heatmap based on dataset 
+            function update(dataset){                
                 var baseTemperature = dataset.baseTemperature;
-                var array = dataset.monthlyVariance;
+                var array = dataset.monthlyVariance;                
 
                 var margin = { top: 0, right: 5, bottom: 70, left: 40 },
                 width = 1200 - margin.left - margin.right,
                 height = 490 - margin.top - margin.bottom,
+                //sizes of each grid
                 gridWidth = 4.42;
                 gridHeight = Math.floor(height / 12),
                 legendElementWidth = 50,                
+                //the first color array
                 //colors = ["#8a020c","#ff2f45","#ff9996","#ffcbd0","#faffff","#c8ceff","#979cff","#3668ff","#000098" ],
+                //the second color array
                 colors = [ "#030388", "#0000f0", "#0049ff", "#00b4ff", "#25ffd1", "#78ff7e", "#cdff28", "#ffc800", "#ff6600", "#f50a00" , "#880000"]
                 buckets = colors.length,
                 months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
+                
+                //create an svg element
                 var svg = d3.select("#heatmap").append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
                 
+                //add month labels to the left side
                 var monthLabels = svg.selectAll(".monthLabel")
                 .data(months)
                 .enter().append("text")
@@ -56,19 +62,22 @@
                 .style("text-anchor", "end")
                 .attr("transform", "translate(-8," + gridHeight / 1.5 + ")");
                 
+                //min and max temperatures
                 var minTemp = d3.min(array, function (d) { return baseTemperature+d.variance; });
                 var maxTemp = d3.max(array, function (d) { return baseTemperature+d.variance; });
-
+                
+                //colorScale is used to transorm a number into color (1 -> #030388)
                 var colorScale = d3.scaleQuantile()
                     .domain([minTemp, maxTemp])
                     .range(colors);
-
+                
+                //year scale
                 var xScale = d3.scaleTime()
                         .domain([d3.min(array, function (d) { return createDate(d.year);}), 
                             d3.max(array, function (d) { return createDate(d.year);})])
                         .range([0, width]);                            
 
-                // define the y axis                              
+                // define the x axis                              
                 var xAxis = d3.axisBottom()                        
                         .scale(xScale)
                         .tickFormat(d3.timeFormat("%Y"));                            
@@ -78,11 +87,9 @@
                     .attr("transform", "translate(0," + (height ) + ")")
                     .call(xAxis);
 
-
+                //add the grids
                 var cards = svg.selectAll(".hour")
                     .data(array, function(d) {return d.variance;});
-
-                cards.append("title");
     
                 cards.enter().append("rect")
                         .attr("x", function(d) {return xScale(createDate(d.year))})
@@ -102,7 +109,7 @@
                             d3.select("#variance")
                             .text((d.variance>0?"+":"")+d.variance);
                             
-                            var xPosition = parseFloat(d3.select(this).attr("x"));
+                            var xPosition = parseFloat(d3.select(this).attr("x"))+10;
                             var yPosition = parseFloat(d3.select(this).attr("y"))+130;                        
                             //Show the tooltip
                             d3.select("#tooltip")
@@ -113,19 +120,17 @@
                         .on("mouseout", function(d){                            
                             //hide the tooltip    
                             d3.select("#tooltip").classed("hidden", true);    
-                        });                     
+                        });
 
-                cards.select("title").text(function(d) { return d.variance; });                
-
-                var legend = svg.selectAll("rect")                        
-                        //.data(colorScale.quantiles().reverse().concat([minTemp]), function(d) { return d; })
+                //add the legend         
+                var legend = svg.selectAll("rect")                                                
                         .data([minTemp].concat(colorScale.quantiles()), function(d) { return d; })
                         .enter()
                         .append("rect")
                         .attr("x", function(d, i){return 290+(legendElementWidth+1)*i;})
                         .attr("y", height+30)
                         .attr("width", legendElementWidth)
-                        .attr("height", gridHeight/1.5)
+                        .attr("height", gridHeight/2)
                         .attr("stroke", "#ccc")
                         .attr("fill", function(d){return colorScale(d);});
                 var legendText = svg.selectAll("text")
@@ -133,18 +138,16 @@
                         .enter()
                         .append("text")                                
                         .attr("x", function(d, i){return 290+legendElementWidth/4+(legendElementWidth)*i;})
-                        .attr("y",  height+70)
+                        .attr("y",  height+65)
                         .attr("fill", "#333")
-                        .text(function(d) {return "≥ " +  Math.round(d*10)/10; });
+                        .text(function(d) {return "≥ " +  Math.round(d*10)/10; });               
                 
-                console.log(13.131, colorScale(13.131));
             }
 
             //this function will return Date object
             function createDate(year){
                 return new Date(year+" 1 1");
-            }
-            console.log("ok");
+            }            
         </script>
     </body>
 </html>
